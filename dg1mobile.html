@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🎂 Doğum Günü Sürprizi</title>
+<style>
+body {
+    margin:0;
+    font-family:sans-serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    color:#fff;
+    text-align:center;
+    overflow:hidden;
+}
+h1 { font-size:2em; margin-bottom:20px; text-shadow:0 0 10px rgba(0,0,0,0.3);}
+input, button {
+    padding:20px;
+    font-size:20px;
+    border-radius:10px;
+    margin:10px;
+    border:none;
+    outline:none;
+    width:90%;
+    max-width:400px;
+}
+button { background:#ff4081; color:#fff; cursor:pointer; }
+button:active{ background:#ff6fa0; }
+#touchArea {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    display:none;
+    z-index:1;
+}
+canvas { position:fixed; top:0; left:0; pointer-events:none; z-index:5; }
+</style>
+</head>
+<body>
+
+<h1 id="msg">🎂 Lütfen isminizi girin 🎂</h1>
+<input type="text" id="nameInput" placeholder="İsminizi yazın">
+<button id="startBtn">Başla 🎉</button>
+
+<div id="touchArea"></div>
+<audio id="music" src="https://cdn.pixabay.com/download/audio/2023/03/08/audio_9283e8a77e.mp3?filename=happy-birthday-jazz-14291.mp3"></audio>
+<canvas id="confetti"></canvas>
+
+<script>
+const msg = document.getElementById("msg");
+const input = document.getElementById("nameInput");
+const btn = document.getElementById("startBtn");
+const touchArea = document.getElementById("touchArea");
+const music = document.getElementById("music");
+const canvas = document.getElementById("confetti");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let nameGlobal = "";
+
+// Başla butonu
+btn.addEventListener("click", startHandler);
+btn.addEventListener("touchstart", startHandler, {passive:true});
+
+function startHandler(e){
+    e.stopPropagation();
+    const name = input.value.trim();
+    if(!name) return alert("İsminizi yazın 😊");
+    nameGlobal = name;
+    msg.innerText = `🎂 Hoş geldiniz ${name}! 🎂\nEkrana dokunun`;
+    input.style.display="none";
+    btn.style.display="none";
+    touchArea.style.display="block";
+}
+
+// Dokunma alanına tıklayınca tetikleme
+touchArea.addEventListener("click", triggerBirthday);
+touchArea.addEventListener("touchstart", triggerBirthday, {passive:true});
+
+function triggerBirthday(){
+    touchArea.style.display="none";
+    msg.innerText = `🎉 Doğum günün kutlu olsun, ${nameGlobal}! 🎉`;
+    music.play();
+    startConfetti();
+}
+
+// Confetti
+function startConfetti(){
+    const pieces = Array.from({length:150}, ()=>({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height - canvas.height,
+        r:Math.random()*8+2,
+        d:Math.random()*canvas.height,
+        color:`hsl(${Math.random()*360},100%,60%)`
+    }));
+    function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(let p of pieces){
+            ctx.fillStyle=p.color;
+            ctx.fillRect(p.x,p.y,p.r,p.r);
+        }
+        update();
+        requestAnimationFrame(draw);
+    }
+    function update(){
+        for(let p of pieces){
+            p.y += Math.cos(p.d)+2;
+            p.x += Math.sin(p.d);
+            if(p.y>canvas.height){ p.y=-10; p.x=Math.random()*canvas.width; }
+        }
+    }
+    draw();
+}
+</script>
+</body>
+</html>
